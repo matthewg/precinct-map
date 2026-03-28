@@ -18,6 +18,11 @@ class Config:
         self.tooltips = self.display.get('tooltips', [self.geo_join_key])
         self.drop_unmatched_geo = self.display.get('drop_unmatched_geo', True)
         
+        self.type = self.display.get('type', 'numeric_open') # enum, numeric_closed, numeric_open
+        self.enum_mappings = self.display.get('enum_mappings', {})
+        self.numeric_bounds = self.display.get('numeric_bounds', {}) # min, max
+        self.numeric_colors = self.display.get('numeric_colors', {}) # min_color, max_color
+        
     @classmethod
     def from_yaml(cls, path):
         if not os.path.exists(path):

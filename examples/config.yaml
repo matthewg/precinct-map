@@ -3,8 +3,15 @@ join_keys:
   csv_join_key: precinct
 display:
   title: "Voter Turnout"
-  data_type: "numeric"
+  type: numeric_closed
   value_column: turnout
+  numeric_bounds:
+    min: 0
+    max: 100
+  numeric_colors:
+    min_color: "#ffcccc"
+    max_color: "#cc0000"
+  drop_unmatched_geo: true
   tooltips:
     - PRECNAME
     - turnout

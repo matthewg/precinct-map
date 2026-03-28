@@ -85,3 +85,53 @@ python main.py \
 ```
 
 Open `examples/map.html` in your web browser to view the interactive choropleth map!
+
+### 6. Map Configurations
+
+The application supports three different visualization strategies which can be specified in the `display` section of your YAML configuration.
+
+#### 1. Enum
+Used when your CSV data contains categorical text (e.g., "Yes", "No"). Specify `type: enum` and map each string value to a specific hex color and description to show in tooltips.
+
+```yaml
+display:
+  type: enum
+  value_column: "Status"
+  enum_mappings:
+    "Yes":
+      color: "#2ca25f"
+      description: "Has Candidate"
+    "No":
+      color: "#e34a33"
+      description: "Open"
+  tooltips:
+    - "NAME"
+    - "description" # The tooltip will automatically display your custom descriptions
+```
+
+#### 2. Numeric, Closed Range
+Used when you want to explicitly define the minimum and maximum boundaries of a numeric scale (e.g., percentages from 0 to 100). The regions will shade linearly between `min_color` and `max_color`.
+
+```yaml
+display:
+  type: numeric_closed
+  value_column: turnout
+  numeric_bounds:
+    min: 0
+    max: 100
+  numeric_colors:
+    min_color: "#ffcccc"
+    max_color: "#cc0000"
+```
+
+#### 3. Numeric, Open Range
+Used when you want the Python script to automatically calculate the minimum and maximum numeric values across your dataset.
+
+```yaml
+display:
+  type: numeric_open
+  value_column: turnout
+  numeric_colors:
+    min_color: "#ffcccc"
+    max_color: "#cc0000"
+```
