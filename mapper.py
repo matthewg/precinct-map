@@ -50,21 +50,22 @@ def create_map(gdf: gpd.GeoDataFrame, df: pd.DataFrame, config, output_path: str
             # Ensure the value column is numeric, coercing any parsing errors to NaN.
             # Strip common formatting characters that prevent correct parsing.
             cleaned = merged[value_col].astype(str).str.replace(r'[$,%]', '', regex=True)
-            merged[value_col] = pd.to_numeric(cleaned, errors='coerce')
+            numeric_col = f"{value_col}_numeric"
+            merged[numeric_col] = pd.to_numeric(cleaned, errors='coerce')
             
             if config.type == 'numeric_closed':
-                vmin = config.numeric_bounds.get('min', merged[value_col].min())
-                vmax = config.numeric_bounds.get('max', merged[value_col].max())
+                vmin = config.numeric_bounds.get('min', merged[numeric_col].min())
+                vmax = config.numeric_bounds.get('max', merged[numeric_col].max())
             else:
-                vmin = merged[value_col].min()
-                vmax = merged[value_col].max()
+                vmin = merged[numeric_col].min()
+                vmax = merged[numeric_col].max()
                 
             colormap = cm.LinearColormap(colors=[min_color, max_color], vmin=vmin, vmax=vmax)
             colormap.caption = config.title
             m.add_child(colormap)
             
             def style_fn(feature):
-                val = feature['properties'].get(value_col)
+                val = feature['properties'].get(numeric_col)
                 
                 # Attempt to properly cast string values in properties if needed
                 if isinstance(val, str):

@@ -15,7 +15,12 @@ class Config:
         self.display = data.get('display', {})
         self.value_column = self.display.get('value_column')
         self.title = self.display.get('title', 'Choropleth Map')
-        self.tooltips = self.display.get('tooltips', [self.geo_join_key])
+        
+        default_tooltips = [self.geo_join_key]
+        if self.value_column:
+            default_tooltips.append(self.value_column)
+        self.tooltips = self.display.get('tooltips', default_tooltips)
+        
         self.drop_unmatched_geo = self.display.get('drop_unmatched_geo', True)
         
         self.type = self.display.get('type', 'numeric_open') # enum, numeric_closed, numeric_open
