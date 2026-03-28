@@ -16,6 +16,7 @@ class Config:
         self.value_column = self.display.get('value_column')
         self.title = self.display.get('title', 'Choropleth Map')
         self.tooltips = self.display.get('tooltips', [self.geo_join_key])
+        self.drop_unmatched_geo = self.display.get('drop_unmatched_geo', True)
         
     @classmethod
     def from_yaml(cls, path):

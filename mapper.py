@@ -1,5 +1,6 @@
 import folium
 import geopandas as gpd
+import pandas as pd
 import json
 
 def create_map(gdf: gpd.GeoDataFrame, df, config, output_path: str):
@@ -7,7 +8,8 @@ def create_map(gdf: gpd.GeoDataFrame, df, config, output_path: str):
     csv_key = config.csv_join_key
     
     # Merge geographic data with tabular data
-    merged = gdf.merge(df, left_on=geo_key, right_on=csv_key, how='left')
+    merge_how = 'inner' if getattr(config, 'drop_unmatched_geo', True) else 'left'
+    merged = gdf.merge(df, left_on=geo_key, right_on=csv_key, how=merge_how)
     
     # Ensure merged is a GeoDataFrame after merging
     if not isinstance(merged, gpd.GeoDataFrame):
@@ -28,21 +30,6 @@ def create_map(gdf: gpd.GeoDataFrame, df, config, output_path: str):
     value_col = config.value_column
     
     if value_col and value_col in merged.columns:
-        choropleth = folium.Choropleth(
-            geo_data=merged.__geo_interface__,
-            data=merged,
-            columns=[geo_key, value_col],
-            key_on=f"feature.properties.{geo_key}",
-            fill_color='YlGnBu',
-            fill_opacity=0.7,
-            line_opacity=0.2,
-            legend_name=config.title,
-            highlight=True
-        ).add_to(m)
-        
-        # In order for tooltip to work properly, properties must be injected back
-        # Since folium.Choropleth passes only limited info, we add a transparent GeoJson layer for tooltips
-        
         tooltip = folium.GeoJsonTooltip(
             fields=config.tooltips,
             aliases=[f"{f}: " for f in config.tooltips],
@@ -57,12 +44,43 @@ def create_map(gdf: gpd.GeoDataFrame, df, config, output_path: str):
             """,
             max_width=800,
         )
-        
-        folium.GeoJson(
-            merged,
-            tooltip=tooltip,
-            style_function=lambda x: {'fillColor': 'transparent', 'color': 'transparent'}
-        ).add_to(m)
+
+        if pd.api.types.is_numeric_dtype(merged[value_col]):
+            choropleth = folium.Choropleth(
+                geo_data=merged.__geo_interface__,
+                data=merged,
+                columns=[geo_key, value_col],
+                key_on=f"feature.properties.{geo_key}",
+                fill_color='YlGnBu',
+                fill_opacity=0.7,
+                line_opacity=0.2,
+                legend_name=config.title,
+                highlight=True
+            ).add_to(m)
+            
+            # Invisible layer for tooltip
+            folium.GeoJson(
+                merged,
+                tooltip=tooltip,
+                style_function=lambda x: {'fillColor': 'transparent', 'color': 'transparent'}
+            ).add_to(m)
+        else:
+            # Handle categorical (Enums)
+            unique_vals = [v for v in merged[value_col].unique() if pd.notna(v)]
+            palette = ['#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', '#d9d9d9']
+            color_map = {val: palette[i % len(palette)] for i, val in enumerate(unique_vals)}
+            
+            def style_fn(feature):
+                val = feature['properties'].get(value_col)
+                color = color_map.get(val, '#cccccc')
+                return {'fillColor': color, 'color': 'black', 'weight': 1, 'fillOpacity': 0.7}
+                
+            folium.GeoJson(
+                merged,
+                style_function=style_fn,
+                name=config.title,
+                tooltip=tooltip
+            ).add_to(m)
     else:
         # Just simple map map with tooltips
         tooltip_fields = config.tooltips if config.tooltips else [geo_key]
