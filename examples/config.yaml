@@ -1,0 +1,10 @@
+join_keys:
+  geo_join_key: PRECNAME
+  csv_join_key: precinct
+display:
+  title: "Voter Turnout"
+  data_type: "numeric"
+  value_column: turnout
+  tooltips:
+    - PRECNAME
+    - turnout

@@ -57,3 +57,31 @@ The application will output a single, HTML file with embedded CSS and Javascript
 - **Interactive Tooltips:** When a user hovers over a region (e.g. precinct), an interactive tooltip will display its exact label, its joined data value, and any descriptive text, making visual data drill-downs effortless.
 - **Cost-Free Mapping Stack:** To avoid API keys or service payments, the tool will leverage completely free Open-Source dependencies. We will utilize **LeafletJS** loaded via a public CDN, alongside **OpenStreetMap (OSM)** base tiles. This provides high-quality foundational mapping (streets, topologies) natively, without incurring hosted mapping service costs.
 - **Dynamic Choropleth Layers:** Beautifully shaded polygons representing the specific region criteria layered over the OSM tiles.
+
+### 5. Installation and Usage
+
+#### Prerequisites
+Ensure you have Python 3.8+ installed on your system.
+
+#### Installation
+This tool uses standard Python `pip` for dependency management. It is recommended to use a virtual environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+#### Usage
+Execute the `main.py` application from the command line, parsing your geospatial boundaries, region CSV data, and a valid YAML configuration.
+
+Example using the synthesized test dataset:
+```bash
+python main.py \
+  --geo examples/boundaries.geojson \
+  --data examples/data.csv \
+  --config examples/config.yaml \
+  --out examples/map.html
+```
+
+Open `examples/map.html` in your web browser to view the interactive choropleth map!

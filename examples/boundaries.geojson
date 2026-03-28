@@ -1,0 +1,37 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "PRECNAME": "Precinct A" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-122.33, 47.60],
+            [-122.32, 47.60],
+            [-122.32, 47.61],
+            [-122.33, 47.61],
+            [-122.33, 47.60]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "PRECNAME": "Precinct B" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-122.32, 47.60],
+            [-122.31, 47.60],
+            [-122.31, 47.61],
+            [-122.32, 47.61],
+            [-122.32, 47.60]
+          ]
+        ]
+      }
+    }
+  ]
+}
