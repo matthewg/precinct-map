@@ -9,7 +9,7 @@ def main():
     parser.add_argument('--geo', required=True, help='Path to geographic boundaries file (.geojson, .shp, .kml)')
     parser.add_argument('--data', required=True, help='Path to region data file (.csv)')
     parser.add_argument('--config', required=True, help='Path to YAML configuration file')
-    parser.add_argument('--out', default='map.html', help='Path to output HTML file')
+    parser.add_argument('--out', default='-', help='Path to output HTML file. Defaults to standard output `-`')
     
     args = parser.parse_args()
     

@@ -3,6 +3,7 @@ import geopandas as gpd
 import pandas as pd
 import branca.colormap as cm
 import json
+import sys
 
 def create_map(gdf: gpd.GeoDataFrame, df: pd.DataFrame, config, output_path: str):
     geo_key = config.geo_join_key
@@ -46,6 +47,11 @@ def create_map(gdf: gpd.GeoDataFrame, df: pd.DataFrame, config, output_path: str
             min_color = config.numeric_colors.get('min_color', '#ffffcc')
             max_color = config.numeric_colors.get('max_color', '#800026')
             
+            # Ensure the value column is numeric, coercing any parsing errors to NaN.
+            # Strip common formatting characters that prevent correct parsing.
+            cleaned = merged[value_col].astype(str).str.replace(r'[$,%]', '', regex=True)
+            merged[value_col] = pd.to_numeric(cleaned, errors='coerce')
+            
             if config.type == 'numeric_closed':
                 vmin = config.numeric_bounds.get('min', merged[value_col].min())
                 vmax = config.numeric_bounds.get('max', merged[value_col].max())
@@ -59,7 +65,15 @@ def create_map(gdf: gpd.GeoDataFrame, df: pd.DataFrame, config, output_path: str
             
             def style_fn(feature):
                 val = feature['properties'].get(value_col)
-                if pd.isna(val):
+                
+                # Attempt to properly cast string values in properties if needed
+                if isinstance(val, str):
+                    try:
+                        val = float(val.replace(',', '').replace('$', '').replace('%', ''))
+                    except ValueError:
+                        val = None
+
+                if pd.isna(val) or val is None:
                     return {'fillColor': '#cccccc', 'color': 'black', 'weight': 1, 'fillOpacity': 0.7}
                 return {'fillColor': colormap(val), 'color': 'black', 'weight': 1, 'fillOpacity': 0.7}
 
@@ -98,5 +112,8 @@ def create_map(gdf: gpd.GeoDataFrame, df: pd.DataFrame, config, output_path: str
             )
         ).add_to(m)
         
-    m.save(output_path)
-    print(f"Map successfully generated and saved to {output_path}")
+    if output_path == '-':
+        print(m.get_root().render())
+    else:
+        m.save(output_path)
+        print(f"Map successfully generated and saved to {output_path}", file=sys.stderr)
